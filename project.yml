@@ -1,0 +1,66 @@
+# Tạo dự án Xcode bằng XcodeGen:  brew install xcodegen && xcodegen generate
+# ⚠️ Đổi "com.example" thành tiền tố của bạn (và sửa SharedStore.groupID cho khớp).
+name: CoTuongAI
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "16.0"
+settings:
+  base:
+    DEVELOPMENT_TEAM: ""          # điền Team ID của bạn (Xcode → Signing & Capabilities)
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+targets:
+  CoTuongAI:
+    type: application
+    platform: iOS
+    scheme: {}
+    sources:
+      - App
+      - Shared
+      - path: Resources/engine.js
+        buildPhase: resources
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: "Cờ Tướng AI"
+        UILaunchScreen: {}
+        UIBackgroundModes: [audio]
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        NSPhotoLibraryUsageDescription: "Chọn ảnh chụp màn hình bàn cờ để hiệu chỉnh nhận diện."
+    entitlements:
+      path: App/App.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.example.cotuongai]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.cotuongai
+        TARGETED_DEVICE_FAMILY: "1"
+    dependencies:
+      - target: CoTuongAIBroadcast
+        embed: true
+
+  CoTuongAIBroadcast:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Broadcast
+      - Shared
+    info:
+      path: Broadcast/Info.plist
+      properties:
+        CFBundleDisplayName: "Cờ Tướng AI"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.broadcast-services-upload
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).SampleHandler"
+          RPBroadcastProcessMode: RPBroadcastProcessModeSampleBuffer
+    entitlements:
+      path: Broadcast/Broadcast.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.example.cotuongai]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.cotuongai.broadcast
+        TARGETED_DEVICE_FAMILY: "1"

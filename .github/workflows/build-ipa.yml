@@ -1,0 +1,63 @@
+name: Build IPA (chưa ký – dùng cho ESign)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Phiên bản Xcode
+        run: xcodebuild -version
+
+      - name: Cài XcodeGen
+        run: brew install xcodegen
+
+      - name: Tạo dự án Xcode
+        run: xcodegen generate
+
+      - name: Build (không ký)
+        run: |
+          set -o pipefail
+          xcodebuild -project CoTuongAI.xcodeproj -scheme CoTuongAI \
+            -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build 2>&1 | tee build.log | grep -E "error:|warning: .*Swift|BUILD (SUCCEEDED|FAILED)" || true
+          test -d build/Build/Products/Release-iphoneos/CoTuongAI.app
+
+      - name: Đóng gói .ipa
+        run: |
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/CoTuongAI.app Payload/
+          ls Payload/CoTuongAI.app/PlugIns
+          zip -qry CoTuongAI.ipa Payload
+          ls -lh CoTuongAI.ipa
+
+      - name: Lưu log khi lỗi
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CoTuongAI-ipa
+          path: CoTuongAI.ipa
+
+      - name: Đăng bản phát hành
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest -y --cleanup-tag || true
+          gh release create latest CoTuongAI.ipa \
+            --title "Cờ Tướng AI – bản mới nhất" \
+            --notes "File .ipa chưa ký. Tải về iPhone rồi nhập vào ESign để ký và cài. Build từ commit ${GITHUB_SHA::7}."
