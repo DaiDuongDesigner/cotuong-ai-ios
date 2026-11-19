@@ -1,5 +1,13 @@
 # Cờ Tướng AI – Trợ lý nổi cho iPhone
 
+**Tải bản cài (.ipa) cho ESign:** https://github.com/DaiDuongDesigner/cotuong-ai-ios/releases/download/latest/CoTuongAI.ipa
+
+**Có gì mới:**
+- **Chọn model AI:** *Nội bộ* (nhanh, nhẹ), *Pikafish NNUE* (engine mạnh nhất, chạy trên máy), *ChessDB đám mây* (kho cờ chessdb.cn, cần mạng; thế lạ tự chuyển về Pikafish).
+- **Đọc toàn màn hình:** bật từ nút trong app hoặc từ Trung tâm điều khiển (chạm giữ nút Ghi màn hình → *Cờ Tướng AI*); có đèn báo đang nhận khung hình / có thấy bàn cờ hay không.
+- **Hiệu chỉnh linh hoạt:** chỉ cần chấm 2 góc gần đúng (lệch tới ~30% ô vẫn tự căn đúng); không bắt buộc khớp hết mọi ô – khi theo dõi, app tự sửa tới 2 ô đọc nhầm dựa trên luật cờ.
+- **38 khai cuộc** có tên, mô tả và nước theo sổ; đọc nước gợi ý bằng giọng nói.
+
 Ứng dụng iOS **tự đọc bàn cờ** trên màn hình khi bạn đang chơi ở một app cờ tướng khác, rồi hiện **nước gợi ý + điểm đánh giá** trong một **cửa sổ nổi (Picture-in-Picture)** nằm đè lên app đó.
 
 ## Cách hoạt động
@@ -56,3 +64,7 @@ iOS **không cho** app vẽ đè lên app khác như Android. Hai cơ chế duy 
 ## Lưu ý về luật chơi
 
 Nhiều app và giải đấu cờ tướng **cấm dùng AI hỗ trợ trong ván có xếp hạng hoặc ván đấu với người thật**, và có thể khoá tài khoản vi phạm. Nên dùng trợ lý này để luyện tập, xem lại ván, hoặc chơi với máy.
+
+## Giấy phép
+
+Dự án dùng [Pikafish](https://github.com/official-pikafish/Pikafish) (GNU GPL v3), nên toàn bộ mã nguồn ở đây phát hành theo **GPL-3.0** (xem `LICENSE`). Pikafish được tải và biên dịch tự động trong GitHub Actions (`scripts/build_pikafish.sh`). Khi build trên Mac của bạn, hãy chạy script này trước `xcodegen generate`.

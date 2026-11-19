@@ -22,6 +22,11 @@ targets:
       - Shared
       - path: Resources/engine.js
         buildPhase: resources
+      - path: Resources/pikafish.nnue
+        buildPhase: resources
+        optional: true
+      - path: Pikafish/PikafishBridge.h
+        buildPhase: none
     info:
       path: App/Info.plist
       properties:
@@ -30,6 +35,7 @@ targets:
         UIBackgroundModes: [audio]
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSPhotoLibraryUsageDescription: "Chọn ảnh chụp màn hình bàn cờ để hiệu chỉnh nhận diện."
+        UIFileSharingEnabled: false
     entitlements:
       path: App/App.entitlements
       properties:
@@ -38,6 +44,10 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.example.cotuongai
         TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_OBJC_BRIDGING_HEADER: Pikafish/Bridging-Header.h
+        HEADER_SEARCH_PATHS: $(PROJECT_DIR)/Pikafish
+        LIBRARY_SEARCH_PATHS: $(PROJECT_DIR)/Pikafish
+        OTHER_LDFLAGS: -lpikafish -lc++
     dependencies:
       - target: CoTuongAIBroadcast
         embed: true

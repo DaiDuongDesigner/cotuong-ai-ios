@@ -18,7 +18,7 @@ struct CalibrationView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                Text("1. Mở app cờ bạn hay chơi, vào một ván mới (thế cờ ban đầu) và **chụp màn hình**.\n2. Chọn ảnh đó bên dưới.\n3. Kéo 2 chấm vàng vào **tâm quân Xe góc trên-trái** và **tâm quân Xe góc dưới-phải** sao cho các vòng tròn trùng với quân.")
+                Text("1. Mở app cờ bạn hay chơi, vào một ván mới (thế cờ ban đầu) và **chụp màn hình**.\n2. Chọn ảnh đó bên dưới.\n3. Kéo 2 chấm vàng tới **quân Xe góc trên-trái** và **quân Xe góc dưới-phải**. Chỉ cần gần đúng – app tự căn lưới, và không bắt buộc khớp hết mọi ô.")
                     .font(.subheadline)
 
                 PhotosPicker(selection: $item, matching: .screenshots) {
@@ -121,14 +121,16 @@ struct CalibrationView: View {
                 guard let res else { message = "Không xử lý được – kiểm tra lại 2 góc."; return }
                 p0 = CGPoint(x: res.calibration.x0, y: res.calibration.y0)
                 p1 = CGPoint(x: res.calibration.x1, y: res.calibration.y1)
-                if res.correct >= 88 {
-                    do {
-                        try model.saveCalibration(res.calibration)
-                        message = "✅ Đã lưu. Tự kiểm tra: đọc đúng \(res.correct)/90 ô. Lưới đã được tự căn chỉnh."
-                    } catch { message = "Lỗi lưu: \(error.localizedDescription)" }
-                } else {
-                    message = "⚠️ Chỉ đọc đúng \(res.correct)/90 ô. Hãy chắc ảnh đang ở thế cờ ban đầu, đúng màu quân, và căn lại 2 góc."
-                }
+                do {
+                    try model.saveCalibration(res.calibration)
+                    if res.correct >= 88 {
+                        message = "✅ Đã lưu. Tự kiểm tra: khớp \(res.correct)/90 ô. Lưới đã được tự căn chỉnh."
+                    } else if res.correct >= 70 {
+                        message = "✅ Đã lưu (khớp \(res.correct)/90 ô). Khi theo dõi, app tự sửa các ô đọc nhầm dựa trên luật cờ, nên vẫn dùng được."
+                    } else {
+                        message = "⚠️ Đã lưu nhưng chỉ khớp \(res.correct)/90 ô – có thể đọc sai nhiều. Nên chắc ảnh ở thế cờ ban đầu, đúng màu quân, rồi kéo 2 góc gần tâm 2 quân Xe hơn."
+                    }
+                } catch { message = "Lỗi lưu: \(error.localizedDescription)" }
             }
         }
     }

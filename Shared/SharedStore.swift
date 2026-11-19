@@ -52,6 +52,16 @@ enum SharedStore {
 
     static func readBoard() -> String? { defaults?.string(forKey: "board") }
 
+    static func writeHeartbeat(fps: Double, boardVisible: Bool) {
+        defaults?.set(Date().timeIntervalSince1970, forKey: "hbTime")
+        defaults?.set(fps, forKey: "hbFps")
+        defaults?.set(boardVisible, forKey: "hbVisible")
+    }
+    static func readHeartbeat() -> (time: Double, fps: Double, visible: Bool)? {
+        guard let d = defaults, d.double(forKey: "hbTime") > 0 else { return nil }
+        return (d.double(forKey: "hbTime"), d.double(forKey: "hbFps"), d.bool(forKey: "hbVisible"))
+    }
+
     static var isBroadcasting: Bool {
         get { defaults?.bool(forKey: "broadcasting") ?? false }
         set { defaults?.set(newValue, forKey: "broadcasting") }

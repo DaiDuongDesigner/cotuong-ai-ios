@@ -17,6 +17,9 @@ final class SampleHandler: RPBroadcastSampleHandler {
     private var lastProcess: CFTimeInterval = 0
     private var lastRead: String?
     private var lastSent: String?
+    private var framesInWindow = 0
+    private var windowStart: CFTimeInterval = 0
+    private var lastVisible: CFTimeInterval = 0
 
     override func broadcastStarted(withSetupInfo setupInfo: [String: NSObject]?) {
         SharedStore.isBroadcasting = true
@@ -38,8 +41,17 @@ final class SampleHandler: RPBroadcastSampleHandler {
     override func processSampleBuffer(_ sampleBuffer: CMSampleBuffer, with sampleBufferType: RPSampleBufferType) {
         guard sampleBufferType == .video, let cal = calibration else { return }
         let now = CACurrentMediaTime()
+        if windowStart == 0 { windowStart = now }
+        if now - windowStart >= 2 {
+            let fps = Double(framesInWindow) / (now - windowStart)
+            let visible = now - lastVisible < 3
+            client.heartbeat(fps: fps, boardVisible: visible)
+            SharedStore.writeHeartbeat(fps: fps, boardVisible: visible)
+            framesInWindow = 0; windowStart = now
+        }
         guard now - lastProcess >= 0.5 else { return }
         lastProcess = now
+        framesInWindow += 1
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
         autoreleasepool {
@@ -50,6 +62,7 @@ final class SampleHandler: RPBroadcastSampleHandler {
                 image = image.oriented(ori)
             }
             guard let board = recognizer.read(image: image, cal: cal) else { lastRead = nil; return }
+            lastVisible = now
             // Chỉ gửi khi đọc được giống nhau 2 khung liên tiếp (tránh lúc quân đang trượt).
             if board == lastRead && board != lastSent {
                 lastSent = board

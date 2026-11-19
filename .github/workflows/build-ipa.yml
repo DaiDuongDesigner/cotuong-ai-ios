@@ -20,6 +20,9 @@ jobs:
       - name: Cài XcodeGen
         run: brew install xcodegen
 
+      - name: Biên dịch Pikafish (NNUE) cho iPhone
+        run: bash scripts/build_pikafish.sh
+
       - name: Tạo dự án Xcode
         run: xcodegen generate
 
@@ -38,6 +41,7 @@ jobs:
           mkdir -p Payload
           cp -R build/Build/Products/Release-iphoneos/CoTuongAI.app Payload/
           ls Payload/CoTuongAI.app/PlugIns
+          ls -lh Payload/CoTuongAI.app/pikafish.nnue
           zip -qry CoTuongAI.ipa Payload
           ls -lh CoTuongAI.ipa
 

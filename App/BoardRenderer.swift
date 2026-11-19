@@ -15,6 +15,7 @@ enum BoardRenderer {
         var thinking: Bool
         var hideSuggestion: Bool
         var status: String
+        var warning: String? = nil
     }
 
     static func image(_ s: State) -> UIImage {
@@ -40,6 +41,7 @@ enum BoardRenderer {
             var line2 = s.status
             if let a = s.analysis, !s.hideSuggestion, !a.over, let first = a.pv.first {
                 line2 = "Nên đi: \(first)   ·   " + a.pv.dropFirst().prefix(3).joined(separator: " ")
+                    + "   [\(a.source)]"
             }
             if s.thinking { line2 = "Đang tính… " + line2 }
             draw(line2, at: CGPoint(x: 14, y: 36), size: 14, weight: .regular,
@@ -104,6 +106,14 @@ enum BoardRenderer {
                 g.addLine(to: CGPoint(x: base.x - uy * 11, y: base.y + ux * 11))
                 g.addLine(to: CGPoint(x: base.x + uy * 11, y: base.y - ux * 11))
                 g.closePath(); g.fillPath()
+            }
+            // Cảnh báo (mất tín hiệu màn hình / không thấy bàn cờ)
+            if let w = s.warning {
+                let r = CGRect(x: 30, y: size.height - 44, width: size.width - 60, height: 32)
+                g.setFillColor(UIColor(red: 0.75, green: 0.18, blue: 0.14, alpha: 0.92).cgColor)
+                g.addPath(UIBezierPath(roundedRect: r, cornerRadius: 10).cgPath); g.fillPath()
+                draw("⚠️ " + w, at: CGPoint(x: r.minX + 10, y: r.minY + 6), size: 15, weight: .semibold,
+                     color: .white, width: r.width - 20, align: .center)
             }
         }
     }

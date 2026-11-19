@@ -133,6 +133,19 @@ final class Recognizer {
     /// `image`: ảnh chụp màn hình app cờ đang ở THẾ CỜ BAN ĐẦU.
     func calibrate(image: CIImage, x0: Double, y0: Double, x1: Double, y1: Double, flipped: Bool) -> CalibResult? {
         let init90 = Array(INIT90)
+        // Tự căn lưới 3 lượt liên tiếp: chịu được việc chấm góc lệch tới ~30% một ô.
+        var g = (x0, y0, x1, y1)
+        for _ in 0..<3 {
+            guard let r = refineGrid(image: image, g.0, g.1, g.2, g.3, flipped: flipped) else { return nil }
+            g = r
+        }
+        let (rx0, ry0, rx1, ry1) = g
+        return finishCalibration(image: image, init90: init90, rx0, ry0, rx1, ry1, flipped: flipped)
+    }
+
+    private func refineGrid(image: CIImage, _ x0: Double, _ y0: Double, _ x1: Double, _ y1: Double,
+                            flipped: Bool) -> (Double, Double, Double, Double)? {
+        let init90 = Array(INIT90)
         guard let buf0 = bitmap(image, x0, y0, x1, y1) else { return nil }
 
         // 1) Tự căn lưới: dò tâm từng quân bằng một mẫu "đĩa quân" đối xứng, rồi khớp lưới bình phương tối thiểu.
@@ -181,7 +194,11 @@ final class Recognizer {
             abs(ry0 - y0) > cellH * 0.3 || abs(ry1 - y1) > cellH * 0.3 {
             rx0 = x0; rx1 = x1; ry0 = y0; ry1 = y1
         }
+        return (rx0, ry0, rx1, ry1)
+    }
 
+    private func finishCalibration(image: CIImage, init90: [Character], _ rx0: Double, _ ry0: Double,
+                                   _ rx1: Double, _ ry1: Double, flipped: Bool) -> CalibResult? {
         // 2) Lấy mẫu từng loại quân trên lưới đã căn.
         guard let buf = bitmap(image, rx0, ry0, rx1, ry1) else { return nil }
         var acc: [String: [Float]] = [:]

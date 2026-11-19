@@ -1,4 +1,4 @@
-// Engine cờ tướng – dùng chung với bản web
+// Engine cờ tướng – dùng chung với bản web (GPL-3.0 cùng dự án)
 
 var MATE=30000, MATE_B=29000, INF=32000;
 var B=new Int8Array(90), side=0, kpos=[0,0], hlo=0, hhi=0;
@@ -174,6 +174,46 @@ function easyPick(noise){
   for(var m of root){make(m); stopT=Date.now()+1e4; stopped=false; var s=-ab(1,-INF,INF,1)+ (Math.random()*2-1)*noise; unmake(m); if(s>bs){bs=s;best=m;}}
   return best;
 }
+var OPENINGS=[
+ {name:'Pháo đầu (Trung pháo)',desc:'Khai cuộc phổ biến nhất: đưa pháo vào giữa, uy hiếp trực tiếp tốt đầu và tướng đối phương.',line:['P2-5']},
+ {name:'Thuận pháo',desc:'Hai bên cùng vào pháo đầu cùng chiều. Thế cờ đối công, nhiều va chạm sớm.',line:['P2-5','P8-5','M2.3','M8.7','X1-2','X9-8']},
+ {name:'Thuận pháo trực xa đối hoành xa',desc:'Đỏ ra xe thẳng, Đen ra xe ngang để sớm đưa xe sang cánh.',line:['P2-5','P8-5','M2.3','M8.7','X1-2','X9.1']},
+ {name:'Thuận pháo hoành xa',desc:'Biến của Thuận pháo: Đỏ ra xe ngang để nhanh chóng sang cánh.',line:['P2-5','P8-5','M2.3','M8.7','X1.1','X9-8','X1-6']},
+ {name:'Nghịch pháo',desc:'Đen vào pháo đầu ngược chiều với Đỏ. Lối chơi táo bạo, phản công mạnh.',line:['P2-5','P2-5','M2.3','M8.7','X1-2','X9-8']},
+ {name:'Bán đồ liệt pháo',desc:'Đen ra xe trước rồi mới vào pháo đầu ngược chiều giữa chừng.',line:['P2-5','M8.7','M2.3','X9-8','X1-2','P2-5']},
+ {name:'Pháo đầu đối Bình phong mã',desc:'Đen lên hai mã bảo vệ tốt đầu như tấm bình phong – thế trận vững chắc, cân bằng.',line:['P2-5','M8.7','M2.3','M2.3','X1-2','X9-8']},
+ {name:'Xe qua hà đối Bình phong mã',desc:'Đỏ đưa xe qua sông sớm để gây sức ép lên cánh của Đen.',line:['P2-5','M8.7','M2.3','X9-8','X1-2','M2.3','X2.6','B7.1']},
+ {name:'Xe qua hà đối Bình phong mã – Tả mã bàn hà',desc:'Đen đưa mã trái lên bờ sông để phản kích xe qua hà.',line:['P2-5','M8.7','M2.3','X9-8','X1-2','M2.3','X2.6','B7.1','M8.7','M7.6']},
+ {name:'Ngũ lục pháo đối Bình phong mã',desc:'Đỏ đặt hai pháo ở lộ 5 và lộ 6, kết hợp tấn công trung lộ và cánh.',line:['P2-5','M8.7','M2.3','M2.3','X1-2','X9-8','P8-6']},
+ {name:'Ngũ thất pháo đối Bình phong mã',desc:'Hai pháo Đỏ ở lộ 5 và lộ 7, nhắm vào mã và cánh phải của Đen.',line:['P2-5','M8.7','M2.3','M2.3','X1-2','X9-8','M8.9','B7.1','P8-7']},
+ {name:'Ngũ cửu pháo đối Bình phong mã',desc:'Pháo Đỏ ra biên lộ 9 để mở đường cho xe trái.',line:['P2-5','M8.7','M2.3','M2.3','X1-2','X9-8','M8.7','B3.1','P8-9']},
+ {name:'Pháo đầu đối Phản cung mã',desc:'Đen lên mã và đặt pháo vào lộ sĩ – thế phòng thủ phản kích linh hoạt.',line:['P2-5','M2.3','M2.3','P8-6']},
+ {name:'Phản cung mã – Đỏ ra xe',desc:'Đỏ ra xe sớm, Đen lên mã phải hoàn thành thế Phản cung mã.',line:['P2-5','M2.3','M2.3','P8-6','X1-2','M8.7']},
+ {name:'Ngũ lục pháo đối Phản cung mã',desc:'Đỏ đặt pháo thứ hai ở lộ 6 đối đầu thế Phản cung mã.',line:['P2-5','M2.3','M2.3','P8-6','X1-2','M8.7','P8-6']},
+ {name:'Pháo đầu đối Tam bộ hổ',desc:'Đen lên mã rồi đưa pháo ra biên để nhanh chóng ra xe.',line:['P2-5','M8.7','M2.3','P8-9']},
+ {name:'Pháo đầu đối Đơn đề mã',desc:'Đen lên một mã chính diện, mã kia ra biên – thế phòng thủ chắc chắn.',line:['P2-5','M2.3','M2.3','M8.9']},
+ {name:'Pháo đầu đối Quy bối pháo',desc:'Đen lùi pháo về sau lưng tướng (quy bối) – thế phòng ngự phản công.',line:['P2-5','M8.7','M2.3','P8/1']},
+ {name:'Tiên nhân chỉ lộ',desc:'Đỏ mở đầu bằng tiến binh 7 – thăm dò, mở đường cho mã, rất linh hoạt.',line:['B7.1']},
+ {name:'Đối binh cục',desc:'Hai bên cùng tiến binh/tốt lộ 7 – đấu trí ôn hòa, chậm rãi.',line:['B7.1','B7.1']},
+ {name:'Tiên nhân chỉ lộ đối Tốt để pháo',desc:'Đen đáp lại bằng pháo đặt dưới tốt 3, nhắm vào binh đã tiến.',line:['B7.1','P2-3']},
+ {name:'Tiên nhân chỉ lộ đối Phi tượng',desc:'Đen lên tượng giữa chờ đợi, giữ thế vững vàng.',line:['B7.1','T3.5']},
+ {name:'Tiên nhân chỉ lộ đối Khởi mã',desc:'Đen lên mã, chưa vội lộ ý đồ.',line:['B7.1','M8.7']},
+ {name:'Tiên nhân chỉ lộ đối Pháo đầu',desc:'Đen phản công ngay bằng pháo đầu.',line:['B7.1','P8-5']},
+ {name:'Phi tượng cục',desc:'Đỏ lên tượng giữa ngay nước đầu – thế phòng thủ vững, chờ phản công.',line:['T3.5']},
+ {name:'Phi tượng đối Quá cung pháo',desc:'Đen đưa pháo qua cung tướng sang lộ 6.',line:['T3.5','P8-4']},
+ {name:'Phi tượng đối Pháo đầu',desc:'Đen chủ động vào pháo đầu tấn công trung lộ.',line:['T3.5','P8-5']},
+ {name:'Phi tượng đối Tiến tốt',desc:'Đen tiến tốt 3, đấu trí chậm.',line:['T3.5','B7.1']},
+ {name:'Khởi mã cục',desc:'Đỏ lên mã trước – nước đi kín đáo, chưa lộ ý đồ.',line:['M2.3']},
+ {name:'Khởi mã đối Tiến tốt',desc:'Đen tiến tốt lộ 7 chặn đường mã.',line:['M2.3','B7.1']},
+ {name:'Khởi mã đối Pháo đầu',desc:'Đen vào pháo đầu ngay.',line:['M2.3','P8-5']},
+ {name:'Biên mã cục',desc:'Đỏ lên mã ra biên – lối chơi lạ, giữ cánh vững.',line:['M2.1']},
+ {name:'Quá cung pháo',desc:'Pháo Đỏ đi qua cung tướng sang lộ 6 – lối chơi lạ, tránh lý thuyết quen thuộc.',line:['P2-6']},
+ {name:'Quá cung pháo đối Tiến mã',desc:'Đen lên mã chờ đợi.',line:['P2-6','M8.7']},
+ {name:'Sĩ giác pháo',desc:'Pháo đặt ở góc sĩ (lộ 4), linh hoạt chuyển hướng tấn công.',line:['P2-4']},
+ {name:'Sĩ giác pháo đối Tiến mã',desc:'Đen lên mã, giữ thế cân bằng.',line:['P2-4','M8.7']},
+ {name:'Kim câu pháo',desc:'Đỏ tiến pháo lên 2 bước (pháo móc câu) để khống chế bờ sông.',line:['P2.2']},
+ {name:'Pháo đầu đối Uyên ương pháo',desc:'Đen đưa cả hai pháo về lộ sĩ/tượng như đôi uyên ương.',line:['P2-5','M8.7','M2.3','P2-4']}
+];
 
 // ===== iOS API (gọi từ Swift qua JavaScriptCore) =====
 var VN=["Tg","S","T","M","X","P","B"];
@@ -198,19 +238,82 @@ function setBoard(s,st){
     var p=col*8+t+1; B[i]=p; hlo^=ZL[p*90+i]; hhi^=ZH[p*90+i]; if(t===0)kpos[col]=i;}
 }
 function boardStr(){var s="";for(var i=0;i<90;i++){var p=B[i]; if(!p){s+=".";continue;} var ch=PCH.charAt((p&7)-1); s+=(p>>3)?ch:ch.toUpperCase();}return s;}
-function apiFindMove(prev,next,st){
-  var sides=[st?1:0, st?0:1];
+function diffCount(a,b){var d=0;for(var i=0;i<90;i++)if(a.charAt(i)!==b.charAt(i))d++;return d;}
+
+/// Tìm 1 hoặc 2 nước biến `prev` thành `next`. Cho phép `next` sai tối đa `maxDiff` ô
+/// (do nhận diện nhầm) – khi đó trả về thế cờ đã được sửa trong trường "board".
+function apiFindMove(prev,next,st,maxDiff){
+  maxDiff=maxDiff||0;
+  var sides=[st?1:0, st?0:1], best=null, base=diffCount(prev,next);
+  function consider(d,res){ if(!best||d<best.d){res.d=d;best=res;} }
   for(var k=0;k<2;k++){ setBoard(prev,sides[k]);
     var lm=legalMoves();
     for(var a=0;a<lm.length;a++){var m=lm[a], n1=notate(m); make(m);
-      if(boardStr()===next){var r={side:side,from:m>>7,to:m&127,notes:[n1]}; unmake(m); return JSON.stringify(r);} unmake(m);} }
-  for(k=0;k<2;k++){ setBoard(prev,sides[k]); var l1=legalMoves();
-    for(a=0;a<l1.length;a++){var m1=l1[a], na=notate(m1); make(m1); var l2=legalMoves();
-      for(var b=0;b<l2.length;b++){var m2=l2[b], nb=notate(m2); make(m2);
-        if(boardStr()===next){var r2={side:side,from:m2>>7,to:m2&127,notes:[na,nb]}; unmake(m2); unmake(m1); return JSON.stringify(r2);} unmake(m2);}
-      unmake(m1);} }
-  return "null";
+      var bs=boardStr(), d=diffCount(bs,next);
+      consider(d+k*0.1,{side:side,from:m>>7,to:m&127,notes:[n1],moves:[m],board:bs});
+      unmake(m);} }
+  if(!best||best.d>=1){
+    for(k=0;k<2;k++){ setBoard(prev,sides[k]); var l1=legalMoves();
+      for(a=0;a<l1.length;a++){var m1=l1[a], na=notate(m1); make(m1); var l2=legalMoves();
+        for(var b=0;b<l2.length;b++){var m2=l2[b], nb=notate(m2); make(m2);
+          var bs2=boardStr(), d2=diffCount(bs2,next);
+          consider(d2+0.5+k*0.1,{side:side,from:m2>>7,to:m2&127,notes:[na,nb],moves:[m1,m2],board:bs2});
+          unmake(m2);}
+        unmake(m1);} }
+  }
+  if(!best) return "null";
+  var real=Math.floor(best.d);
+  if(real>maxDiff || real>=base) return "null";
+  best.fuzzy=real>0; best.d=real;
+  return JSON.stringify(best);
 }
+
+/// Thế cờ → FEN (dùng cho Pikafish và ChessDB).
+function apiFen(s,st){
+  var rows=[];
+  for(var r=0;r<10;r++){var row="",e=0;
+    for(var c=0;c<9;c++){var ch=s.charAt(r*9+c); if(ch==="."){e++;continue;} if(e){row+=e;e=0;} row+=ch;}
+    if(e)row+=e; rows.push(row);}
+  return rows.join("/")+" "+(st?"b":"w");
+}
+
+/// Nước UCI ("h2e2") → {from,to}. Cột a–i trái→phải (phía Đỏ), hàng 0 ở dưới (Đỏ).
+function uciToMove(u){
+  var fc=u.charCodeAt(0)-97, fr=9-parseInt(u.charAt(1),10), tc=u.charCodeAt(2)-97, tr=9-parseInt(u.charAt(3),10);
+  if(isNaN(fr)||isNaN(tr)||fc<0||fc>8||tc<0||tc>8)return -1;
+  return (fr*9+fc)<<7|(tr*9+tc);
+}
+/// Đổi chuỗi nước UCI sang ký hiệu Việt (dừng ở nước không hợp lệ).
+function apiNotateUci(s,st,list){
+  setBoard(s,st); var out=[], first=null;
+  for(var i=0;i<list.length;i++){var m=uciToMove(list[i]);
+    if(m<0||legalMoves().indexOf(m)<0)break;
+    if(first===null)first=m; out.push(notate(m)); make(m);}
+  return JSON.stringify({notes:out, from:first===null?-1:first>>7, to:first===null?-1:first&127});
+}
+
+/// Nhận diện khai cuộc từ chuỗi nước tính từ thế ban đầu.
+var OPEN_MOVES=null;
+function buildOpenings(){
+  if(OPEN_MOVES)return; OPEN_MOVES=[];
+  for(var i=0;i<OPENINGS.length;i++){ reset(0); var mv=[];
+    for(var j=0;j<OPENINGS[i].line.length;j++){var s=OPENINGS[i].line[j];
+      var h=legalMoves().filter(function(m){return notate(m)===s;}); if(h.length!==1)break; mv.push(h[0]); make(h[0]);}
+    OPEN_MOVES.push(mv);}
+}
+function apiOpening(movesJson){
+  buildOpenings(); var mv=JSON.parse(movesJson), best=-1, book={};
+  for(var i=0;i<OPENINGS.length;i++){var l=OPEN_MOVES[i], ok=true;
+    if(l.length<=mv.length){ for(var j=0;j<l.length;j++)if(l[j]!==mv[j]){ok=false;break;}
+      if(ok&&(best<0||l.length>OPEN_MOVES[best].length))best=i; }
+    else { for(j=0;j<mv.length;j++)if(l[j]!==mv[j]){ok=false;break;}
+      if(ok)book[l[mv.length]]=OPENINGS[i].name; }
+  }
+  reset(0); for(i=0;i<mv.length;i++)make(mv[i]);
+  var bk=[]; for(var key in book){var m=+key; bk.push({note:notate(m),from:m>>7,to:m&127,name:book[key]});}
+  return JSON.stringify({name:best<0?"":OPENINGS[best].name, desc:best<0?"":OPENINGS[best].desc, book:bk});
+}
+
 function apiAnalyze(s,st,ms){
   setBoard(s,st); var chk=inCheck(side);
   if(!legalMoves().length) return JSON.stringify({over:true,side:side,check:chk});
@@ -220,3 +323,4 @@ function apiAnalyze(s,st,ms){
   var mate=Math.abs(r.score)>MATE_B?Math.ceil((MATE-Math.abs(r.score))/2)*(r.score>0?1:-1):0;
   return JSON.stringify({over:false,side:side,check:chk,from:r.move>>7,to:r.move&127,score:r.score,mate:mate,depth:r.depth,pv:pv});
 }
+function apiStatus(s,st){ setBoard(s,st); return JSON.stringify({over:legalMoves().length===0, check:inCheck(side)}); }

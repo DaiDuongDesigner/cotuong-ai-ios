@@ -3,3 +3,6 @@ build/
 Payload/
 *.ipa
 .DS_Store
+build-pikafish/
+Pikafish/libpikafish.a
+Resources/pikafish.nnue

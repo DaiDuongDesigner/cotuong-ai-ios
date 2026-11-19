@@ -5,7 +5,7 @@ import Network
 /// Dùng khi App Group không hoạt động – thường gặp khi cài bằng ESign/ký lại bằng chứng chỉ khác.
 /// Giao thức: mỗi dòng văn bản kết thúc bằng "\n".
 ///   App → Extension:  "CAL <json hiệu chỉnh>"
-///   Extension → App:  "BOARD <90 ký tự>"
+///   Extension → App:  "BOARD <90 ký tự>"  |  "HB <khung/giây> <1 nếu thấy bàn cờ, 0 nếu không>"
 enum Loopback {
     static let port: NWEndpoint.Port = 47811
 }
@@ -61,6 +61,7 @@ final class LoopbackServer {
     private let queue = DispatchQueue(label: "cotuongai.loopback")
     var calibrationJSON: () -> String? = { nil }
     var onBoard: ((String) -> Void)?
+    var onHeartbeat: ((Double, Bool) -> Void)?
 
     func start() {
         guard listener == nil else { return }
@@ -87,6 +88,11 @@ final class LoopbackServer {
             if line.hasPrefix("BOARD ") {
                 let s = String(line.dropFirst(6))
                 DispatchQueue.main.async { self?.onBoard?(s) }
+            } else if line.hasPrefix("HB ") {
+                let p = line.split(separator: " ")
+                let fps = p.count > 1 ? Double(p[1]) ?? 0 : 0
+                let ok = p.count > 2 && p[2] == "1"
+                DispatchQueue.main.async { self?.onHeartbeat?(fps, ok) }
             }
         }
         lc.onClose = { [weak self, weak lc] in
@@ -139,6 +145,9 @@ final class LoopbackClient {
     }
 
     func send(board: String) { queue.async { self.lc?.send("BOARD " + board) } }
+    func heartbeat(fps: Double, boardVisible: Bool) {
+        queue.async { self.lc?.send(String(format: "HB %.1f %d", fps, boardVisible ? 1 : 0)) }
+    }
 
     func stop() { stopped = true; lc?.cancel() }
 }
