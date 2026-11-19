@@ -26,6 +26,22 @@ struct BroadcastPicker: UIViewRepresentable {
     }
     func updateUIView(_ uiView: RPSystemBroadcastPickerView, context: Context) {}
 
+    /// Chẩn đoán: extension có còn trong app sau khi ký (ESign) không, và bundle id có hợp lệ không.
+    static func diagnose() -> (ok: Bool, text: String) {
+        let appID = Bundle.main.bundleIdentifier ?? "?"
+        guard let dir = Bundle.main.builtInPlugInsURL,
+              let items = try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil),
+              let appex = items.first(where: { $0.pathExtension == "appex" }) else {
+            return (false, "❌ Không tìm thấy phần đọc màn hình trong app – công cụ ký (ESign) đã gỡ nó. Hãy ký lại và TẮT tuỳ chọn xoá plugin/tiện ích mở rộng.")
+        }
+        let b = Bundle(url: appex)
+        let extID = b?.bundleIdentifier ?? "?"
+        guard extID.hasPrefix(appID + ".") else {
+            return (false, "❌ Mã định danh không khớp: app \(appID), phần đọc màn hình \(extID). iOS sẽ bỏ qua phần này. Khi ký, đừng đổi Bundle ID (hoặc dùng tuỳ chọn đổi cho cả plugin).")
+        }
+        return (true, "✅ Phần đọc màn hình đã cài (\(extID)). Nếu chưa thấy trong danh sách Ghi màn hình, hãy khởi động lại iPhone.")
+    }
+
     /// Đọc bundle id thật của extension (ESign có thể đổi bundle id khi ký lại).
     static func extensionBundleID() -> String? {
         guard let dir = Bundle.main.builtInPlugInsURL,

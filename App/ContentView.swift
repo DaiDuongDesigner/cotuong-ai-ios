@@ -93,6 +93,8 @@ struct ContentView: View {
                     .frame(width: 10, height: 10)
                 Text(model.screenStatus).font(.footnote)
             }
+            let diag = BroadcastPicker.diagnose()
+            Text(diag.text).font(.footnote).foregroundStyle(diag.ok ? Color.green : Color.red)
             DisclosureGroup("Bật từ Trung tâm điều khiển") {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("1. Cài đặt → Trung tâm điều khiển → thêm **Ghi màn hình** (nếu chưa có).")
